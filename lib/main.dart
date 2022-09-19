@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:timetraz/timerentry.dart';
+import 'package:timetraz/src/formedittask.dart';
+import 'package:timetraz/src/timerentry.dart';
 
 void main() {
   runApp(const MyApp());
@@ -63,7 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _updateEntries(Timer timer) {
-    List<TimerEntry> actived = entries.where((e) => e.active).toList();
+    List<TimerEntry> actived =
+        entries.where((e) => e.active && !e.done).toList();
     if (actived.isNotEmpty) {
       setState(() {
         for (var e in actived) {
@@ -73,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void toggleActive(TimerEntry entry) {
+  void _toggleActive(TimerEntry entry) {
     setState(() => {entry.active = !entry.active});
   }
 
@@ -88,6 +91,56 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _resetEntry(TimerEntry entry) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('Confirmar'),
+              content:
+                  const Text('Tem certeza que deseja ressetar esta tarefa?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'Cancel'),
+                  child: const Text('Não'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      entry.seconds = 0;
+                    });
+                    Navigator.pop(context, 'OK');
+                  },
+                  child: const Text('Sim'),
+                ),
+              ],
+            ));
+  }
+
+  void _removeEntry(TimerEntry entry) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: const Text('Confirmar'),
+              content:
+                  const Text('Tem certeza que deseja excluir esta tarefa?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, 'Cancel'),
+                  child: const Text('Não'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      entries.remove(entry);
+                    });
+                    Navigator.pop(context, 'OK');
+                  },
+                  child: const Text('Sim'),
+                ),
+              ],
+            ));
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -98,10 +151,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+          // Here we take the value from the MyHomePage object that was created by
+          // the App.build method, and use it to set our appbar title.
+          title: Text(widget.title),
+          elevation: 8,
+          actions: [
+            ElevatedButton(
+              onPressed: _addNewEntry,
+              child: const Icon(Icons.add),
+            ),
+          ]),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -111,11 +170,6 @@ class _MyHomePageState extends State<MyHomePage> {
           itemCount: entries.length,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addNewEntry,
-        tooltip: 'Add new entry',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
@@ -129,12 +183,29 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Text(
-              e.description,
-              style: const TextStyle(
-                fontFamily: 'Lucida Casual',
-                fontSize: 30,
-                color: Colors.black,
+            child: Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: e.done,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value != null) {
+                          e.done = value;
+                        }
+                      });
+                    },
+                  ),
+                  Text(
+                    e.title,
+                    style: TextStyle(
+                      // fontFamily: 'Lucida Casual',
+                      fontSize: 30,
+                      color: e.done ? Colors.grey : Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -142,10 +213,10 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(12),
             child: Text(
               "${(e.seconds ~/ 60).toString().padLeft(2, '0')}:${(e.seconds % 60).toString().padLeft(2, '0')}",
-              style: const TextStyle(
-                fontFamily: 'Arial',
+              style: TextStyle(
+                // fontFamily: 'Arial',
                 fontSize: 30,
-                color: Colors.black,
+                color: e.done ? Colors.grey : Colors.black,
               ),
             ),
           ),
@@ -157,20 +228,46 @@ class _MyHomePageState extends State<MyHomePage> {
             child: ButtonBar(
               children: [
                 ElevatedButton(
-                    onPressed: () {},
+                  onPressed: () {
+                    _resetEntry(e);
+                  },
+                  child: const Icon(
+                    Icons.restart_alt,
+                    color: Colors.white,
+                    size: 12.0,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _removeEntry(e);
+                  },
+                  child: const Icon(
+                    Icons.remove,
+                    color: Colors.white,
+                    size: 12.0,
+                  ),
+                ),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  FormEditTask(entry: e)));
+                    },
                     child: const Icon(
                       Icons.edit,
                       color: Colors.white,
-                      size: 16.0,
+                      size: 12.0,
                     )),
                 ElevatedButton(
                   onPressed: () {
-                    toggleActive(e);
+                    _toggleActive(e);
                   },
                   child: Icon(
-                    !e.active ? Icons.play_arrow : Icons.stop,
+                    !e.active ? Icons.play_arrow : Icons.pause,
                     color: Colors.white,
-                    size: 16.0,
+                    size: 12.0,
                   ),
                 ),
               ],
