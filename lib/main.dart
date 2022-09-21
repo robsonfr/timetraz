@@ -1,10 +1,16 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:timetraz/src/formedittask.dart';
 import 'package:timetraz/src/timerentry.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized;
+  await Supabase.initialize(
+    url: 'https://eahjqeanrfllzblsdtmd.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaGpxZWFucmZsbHpibHNkdG1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjM1MzEwMzEsImV4cCI6MTk3OTEwNzAzMX0.fQxGvEzWJBASlE0Luk0Q190FNuvTBUaeoCwWXvB-3z8',
+  );
   runApp(const MyApp());
 }
 
@@ -116,6 +122,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ));
   }
 
+  void _updateEntry(TimerEntry oldEntry, TimerEntry newEntry) {
+    setState(() {
+      oldEntry.title = newEntry.title;
+      oldEntry.description = newEntry.description;
+    });
+  }
+
   void _removeEntry(TimerEntry entry) {
     showDialog(
         context: context,
@@ -183,11 +196,11 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(12),
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Row(
-                children: [
-                  Checkbox(
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Checkbox(
                     value: e.done,
                     onChanged: (value) {
                       setState(() {
@@ -197,7 +210,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       });
                     },
                   ),
-                  Text(
+                ),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 400.0),
+                  child: Text(
                     e.title,
                     style: TextStyle(
                       // fontFamily: 'Lucida Casual',
@@ -205,10 +221,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: e.done ? Colors.grey : Colors.black,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(12),
             child: Text(
@@ -248,12 +265,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      TimerEntry n = await Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (BuildContext context) =>
                                   FormEditTask(entry: e)));
+                      _updateEntry(e, n);
                     },
                     child: const Icon(
                       Icons.edit,
