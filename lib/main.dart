@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:timetraz/src/formedittask.dart';
 import 'package:timetraz/src/timerentry.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:timetraz/src/conta.dart';
+import 'package:timetraz/src/login.dart';
+import 'package:timetraz/src/splash.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized;
@@ -11,39 +14,95 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaGpxZWFucmZsbHpibHNkdG1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjM1MzEwMzEsImV4cCI6MTk3OTEwNzAzMX0.fQxGvEzWJBASlE0Luk0Q190FNuvTBUaeoCwWXvB-3z8',
   );
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
 
-  // This widget is the root of your application.
+//   await Supabase.initialize(
+//     // TODO: Replace credentials with your own
+//     url: '[YOUR_SUPABASE_URL]',
+//     anonKey: '[YOUR_SUPABASE_ANNON_KEY]',
+//   );
+//   runApp(MyApp());
+// }
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.orange,
+      title: 'Supabase Flutter',
+      theme: ThemeData.dark().copyWith(
+        primaryColor: Colors.green,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            onPrimary: Colors.white,
+            primary: Colors.green,
+          ),
+        ),
       ),
-      home: const MyHomePage(title: 'Time Traz'),
+      initialRoute: '/',
+      routes: <String, WidgetBuilder>{
+        '/': (_) => const SplashPage(),
+        '/login': (_) => const LoginPage(),
+        '/account': (_) => const AccountPage(),
+      },
     );
   }
 }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   // This widget is the root of your application.
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Time Traz',
+//       theme: ThemeData(
+//         // This is the theme of your application.
+//         //
+//         // Try running your application with "flutter run". You'll see the
+//         // application has a blue toolbar. Then, without quitting the app, try
+//         // changing the primarySwatch below to Colors.green and then invoke
+//         // "hot reload" (press "r" in the console where you ran "flutter run",
+//         // or simply save your changes to "hot reload" in a Flutter IDE).
+//         // Notice that the counter didn't reset back to zero; the application
+//         // is not restarted.
+//         primarySwatch: Colors.orange,
+//       ),
+//       home: const MyHomePage(title: 'Time Traz'),
+//     );
+//   }
+// }
 
 class TimeItem {
   final TimerEntry entry;
 
   const TimeItem(this.entry);
 }
+
+// class LoginPage extends StatelessWidget {
+//   const LoginPage({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//         body: Column(
+//       children: const [
+//         Card(
+//             semanticContainer: true,
+//             elevation: 4,
+//             //   shape: RoundedRectangleBorder(
+//             //     borderRadius: BorderRadius.circular(6)),
+//             child: Image(
+//               image: AssetImage('images/clock01.jpeg'),
+//             )),
+//       ],
+//     ));
+//   }
+// }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -174,11 +233,13 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Icon(Icons.add),
             ),
           ]),
-      body: Center(
+      body: Container(
+        alignment: Alignment.topCenter,
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: ListView.builder(
           // children: doEntries,
+          shrinkWrap: true,
           itemBuilder: getEntry,
           itemCount: entries.length,
         ),
@@ -212,12 +273,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 Container(
-                  constraints: const BoxConstraints(minWidth: 400.0),
+                  constraints: const BoxConstraints(minWidth: 160.0),
                   child: Text(
                     e.title,
                     style: TextStyle(
                       // fontFamily: 'Lucida Casual',
-                      fontSize: 30,
+                      fontSize: 14,
                       color: e.done ? Colors.grey : Colors.black,
                     ),
                   ),
@@ -232,7 +293,7 @@ class _MyHomePageState extends State<MyHomePage> {
               "${(e.seconds ~/ 60).toString().padLeft(2, '0')}:${(e.seconds % 60).toString().padLeft(2, '0')}",
               style: TextStyle(
                 // fontFamily: 'Arial',
-                fontSize: 30,
+                fontSize: 14,
                 color: e.done ? Colors.grey : Colors.black,
               ),
             ),
