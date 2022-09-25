@@ -10,9 +10,9 @@ import 'package:timetraz/src/splash.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized;
   await Supabase.initialize(
-    url: 'https://eahjqeanrfllzblsdtmd.supabase.co',
+    url: '<SUPABASE_URL>',
     anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhaGpxZWFucmZsbHpibHNkdG1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjM1MzEwMzEsImV4cCI6MTk3OTEwNzAzMX0.fQxGvEzWJBASlE0Luk0Q190FNuvTBUaeoCwWXvB-3z8',
+        '<SUPABASE_ANON_KEY>',
   );
   runApp(MyApp());
 }
